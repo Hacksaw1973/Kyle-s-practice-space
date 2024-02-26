@@ -2,7 +2,6 @@
 #SATURDAY NIGHT IS THE LONELIEST NIGHT OF THE WEEK
 
 library(tidyverse)
-install.packages("nycflights13")
 library(nycflights13)
 
 
@@ -55,7 +54,7 @@ flights %>%
 # Group III. groups
 # Group IV. tables
 
-# ROWS
+# GROUP I: ROWS
 #   filter()
 #       tells R which rows to keep based on which values you want for any given column(s)
 #       first argument, as stated above, is the name of the data frame 
@@ -102,7 +101,7 @@ flights %>%
 arrange(desc(arr_delay))
 
 # On its own, arrange() only sorts. The number of rows in your output will equal the number in the original data frame.
-# filer() takes rows out, that is, if any of them contain the value(s) you specified in the column(s).
+# filter() takes rows out, that is, if any of them contain the value(s) you specified in the column(s).
 
 
 #    distinct()
@@ -129,18 +128,130 @@ flights %>%
 flights %>%
   count(origin, dest, sort = TRUE)
 
-# ...and remember that, because you specified it, the rows'll be sorted and therefor in descending order.
+# ...and remember that, because you specified it, the rows'll be sorted and therefore in descending order.
+
+# GROUP II: COLUMNS
+
+# mutate() 
+#    creates new columns (to the far right) derived from existing columns for calculations like means and averages and sums
+# select()
+#    changes which columns are present
+# rename()
+#    changes names of columns
+# relocate()
+#    changes positions of columns
 
 
+#   mutate()
+
+flights %>%
+  mutate(gain = dep_delay - arr_delay, speed = distance / air_time * 60)
+
+# use " .before " to put the new columns 'mutate' generates to the far left so that you can see them! 
+
+flights %>%
+  mutate(gain = dep_delay - arr_delay, speed = distance / air_time * 60, .before = 1)
+
+# or set " .before " ( or " .after ") to equal one of the columns to plop 'gain' and 'speed' someplace else...
+
+flights %>%
+  mutate(gain = dep_delay - arr_delay, speed = distance / air_time * 60, .before = dep_time)
+
+
+flights %>%
+  mutate(gain = dep_delay - arr_delay, speed = distance / air_time * 60, .after = arr_delay)
+
+# Remember " .keep "?
+
+flights %>%
+  mutate(gain = dep_delay - arr_delay, speed = distance / air_time * 60, .keep = "used")
+
+
+# setting " .keep" to "used" calls the columns you created and any columns involved in their calculations.
+# Other settings for " .keep " are  "all", "unused", or "none", not "gain".
+
+gain_speed <- flights %>%
+  mutate(gain = dep_delay - arr_delay, speed = distance / air_time * 60, .keep = "used")
+view(gain_speed)
+
+#  select()
+#     "rapidly zoom in on a useful subset using operations based on the names of the variables"
+
+flights %>%
+  select(year, month, day)
+
+# for a range of consecutive columns, use a " : "....
+
+flights %>%
+  select(carrier:dest)
+
+# for all the columns OUTSIDE of an INCLUSIVE SET OF CONSECUTIVE COLUMNS, use a " ! " (or the less popular " - ") before the first variable...
+
+flights %>%
+  select(!carrier:dest)
+
+flights %>%
+  select(-carrier:dest)
+
+# select columns by data type...
+
+flights %>%
+  select(where(is.character))
+
+# tell select to give you columns where names begin or end with a specific sequence of letters...
+
+flights %>%
+  select(starts_with("arr"))
+
+flights %>%
+  select(ends_with("delay"))
   
+flights %>%
+  select(contains("ay"))
+
+# select() also has an nner function for numbers...
+
+# flights %>%
+#   select(num_range("x", 1:3))
 
 
+# On e way to rename columns is to set them as you go in a select function...
+flights %>%
+  select(tail_number = tailnum)
 
+#...but another way is with the "rename()" function! 
 
+#  rename()
+#      this'll rename only the variables (column names) you define.
 
+flights %>%
+  rename(tail_number = tailnum)
 
+#  relocate()
+#       move variables around. Unless you specify, the function's default is move what you declare to the front...
 
+# By default...
 
+flights %>%
+  relocate(time_hour, air_time)
+#       
+# and telling R to put them somewhere else...
 
+flights %>%
+  relocate(year:dep_time, .after = time_hour)
 
+# or
 
+flights %>%
+  relocate(starts_with("arr"), .before = dep_time)
+
+# THE PIPE
+
+# combine a bunch with it!!!
+
+flights %>%
+  filter(dest == "IAH") %>%
+  mutate(speed = distance / air_time * 60) %>%
+  select(year:day, dep_time, dest, carrier, flight, speed) %>%
+  arrange(desc(speed))
+    
