@@ -1,0 +1,20 @@
+---
+title: "Boxplots for Tests"
+output: html_document
+date: "2024-03-03"
+---
+
+```{r setup, include=FALSE, warning=FALSE, message = FALSE}
+
+view(mesoamerica_remains)
+colnames(mesoamerica_remains)
+
+```
+
+```{r}
+ggplot(mesoamerica_remains, aes(x= Delta_N_Collagen, y = Min_Cal_Yr)) +
+         geom_boxplot()
+
+
+```
+
